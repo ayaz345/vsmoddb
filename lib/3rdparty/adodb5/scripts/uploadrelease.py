@@ -92,9 +92,9 @@ def sourceforge_target_dir(version):
 
     directory = 'adodb-php5-only/'
     if LooseVersion(version) >= LooseVersion('5.21'):
-        directory += "adodb-" + short_version
+        directory += f"adodb-{short_version}"
     else:
-        directory += "adodb-{}-for-php5".format(short_version.replace('.', ''))
+        directory += f"adodb-{short_version.replace('.', '')}-for-php5"
 
     return directory
 

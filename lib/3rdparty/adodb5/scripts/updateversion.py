@@ -61,7 +61,7 @@ def version_parse(version):
     ''' Breakdown the version into groups (Z and -dev are optional)
         1:(X.Y), 2:(.Z), 3:(Z), 4:(-dev)
     '''
-    return re.match(r'^%s$' % _version_regex, version)
+    return re.match(f'^{_version_regex}$', version)
 
 
 def version_check(version):
@@ -97,11 +97,7 @@ def get_release_date(version):
         For development releases, DD-MMM will be ??-???
     '''
     # Development release
-    if version_is_dev(version):
-        date_format = "??-???-%Y"
-    else:
-        date_format = "%d-%b-%Y"
-
+    date_format = "??-???-%Y" if version_is_dev(version) else "%d-%b-%Y"
     # Define release date
     return date.today().strftime(date_format)
 
@@ -110,15 +106,7 @@ def sed_script(version):
     ''' Builds sed script to update version information in source files
     '''
 
-    # Version number and release date
-    script = r"s/{}\s+(-?)\s+{}/v{} \5 {}/".format(
-        _version_regex,
-        _release_date_regex,
-        version,
-        get_release_date(version)
-    )
-
-    return script
+    return f"s/{_version_regex}\s+(-?)\s+{_release_date_regex}/v{version} \5 {get_release_date(version)}/"
 
 
 def sed_filelist():
@@ -131,9 +119,7 @@ def sed_filelist():
             f for f in files
             if re.search(r'\.(php|html?)$', f, re.IGNORECASE)
             ]
-        for fname in files:
-            dirlist.append(path.join(root, fname))
-
+        dirlist.extend(path.join(root, fname) for fname in files)
     return dirlist
 
 
@@ -157,9 +143,10 @@ def tag_delete(version):
     ''' Deletes the specified tag
     '''
     subprocess.check_call(
-        "git tag --delete " + tag_name(version),
+        f"git tag --delete {tag_name(version)}",
         stderr=subprocess.PIPE,
-        shell=True)
+        shell=True,
+    )
 
 
 def tag_create(version):
